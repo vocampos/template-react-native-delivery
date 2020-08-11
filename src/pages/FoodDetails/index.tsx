@@ -73,38 +73,67 @@ const FoodDetails: React.FC = () => {
 
   useEffect(() => {
     async function loadFood(): Promise<void> {
-      // Load a specific food with extras based on routeParams id
+      const { data } = await api.get<Food>(`/foods/${routeParams.id}`);
+      const parsedFood = {
+        ...data,
+        formattedPrice: formatValue(data.price),
+      };
+
+      setExtras(data.extras.map(extra => ({ ...extra, quantity: 0 })));
+      setFood(parsedFood);
     }
 
     loadFood();
   }, [routeParams]);
 
   function handleIncrementExtra(id: number): void {
-    // Increment extra quantity
+    const extraTemp = extras.map(e =>
+      e.id === id ? { ...e, quantity: e.quantity + 1 } : e,
+    );
+
+    setExtras(extraTemp);
   }
 
   function handleDecrementExtra(id: number): void {
-    // Decrement extra quantity
+    const extraTemp = extras.map(e =>
+      e.id === id ? { ...e, quantity: e.quantity - 1 } : e,
+    );
+
+    setExtras(extraTemp);
   }
 
   function handleIncrementFood(): void {
-    // Increment food quantity
+    setFoodQuantity(foodQuantity + 1);
   }
 
   function handleDecrementFood(): void {
-    // Decrement food quantity
+    setFoodQuantity(foodQuantity === 1 ? foodQuantity : foodQuantity - 1);
   }
 
   const toggleFavorite = useCallback(() => {
-    // Toggle if food is favorite or not
-  }, [isFavorite, food]);
+    setIsFavorite(!isFavorite);
+  }, [isFavorite]);
 
   const cartTotal = useMemo(() => {
-    // Calculate cartTotal
+    const extrasTotal = extras.reduce((acumulator, extra) => {
+      // eslint-disable-next-line
+      acumulator += extra.value * extra.quantity;
+
+      return acumulator;
+    }, 0);
+
+    const foodTotal = food.price * foodQuantity;
+
+    const total = foodTotal + extrasTotal;
+
+    return formatValue(total);
   }, [extras, food, foodQuantity]);
 
   async function handleFinishOrder(): Promise<void> {
-    // Finish the order and save on the API
+    const {} = food;
+    await api.post<Food>('/food', {
+
+    });
   }
 
   // Calculate the correct icon name
